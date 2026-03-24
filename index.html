@@ -2,55 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web based drawing</title>
+    <title>shapeshift | welcome</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div id="toolbar">
-        <div class="tool-group">
-            <button id="clear">Clear</button>
-            <button id="undo">Undo</button>
-        </div>
-
-        <div class="tool-group">
-            <label for="colorPicker">Color</label>
-            <input type="color" id="colorPicker" value="#355872">
-            <label for="lineWidth">Size</label>
-            <input type="range" id="lineWidth" min="1" max="25" value="5">
-        </div>
-
-        <div class="tool-group">
-            <label for="shapeSelector">Tool</label>
-            <select id="shapeSelector">
-                <option value="brush">Free Hand</option>
-                <option value="square">Square</option>
-                <option value="rect">Rectangle</option>
-                <option value="circle">Circle</option>
-                <option value="triangle">Triangle</option>
-                <option value="select">Selection Tool</option>
-                <option value="addImage">Image</option>
-                <option value="text">Text Box</option>
-            </select>
-        </div>
-
-        <div class="tool-group">
-            <button id="theme-toggle" class="icon-btn">Dark Mode</button>
-        </div>
-
-        <div class="tool-group">
-            <button id="random-img">Add Image</button>
-        </div>
-
-
-        <label class="toggle">
-        <input type="checkbox" id="btnToggle" name="btnToggle" />
-        <span class="slider"></span>
-        </label>
+<body class="home-body">
+    <div class="landing-container">
+        <h1 class="landing-title">shapeshift</h1>
+        <p class="landing-para">A drawing tool built with vanilla HTML, CSS and JS.</p>
+        <a href="canvas.html" class="start-button">Launch</a>
     </div>
-
-    <canvas id="canvas"></canvas>
-
-    <script src="script.js"></script>
 </body>
 </html>
