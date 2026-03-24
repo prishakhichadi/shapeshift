@@ -304,7 +304,7 @@ canvas.addEventListener('mousemove', (e) => {
         return;
     }
 
-    if (!isDrawing) return;
+    if (!isDrawing || shapeSelector.value === 'addImage') return;;
 
     if (shapeSelector.value === 'brush') {
         shapes[shapes.length - 1].points.push({ x: mouseX, y: mouseY });
@@ -325,24 +325,61 @@ canvas.addEventListener('mousemove', (e) => {
     }
 });
 
-canvas.addEventListener('mouseup', () => {
-    if (isDrawing && shapeSelector.value !== 'brush' && shapeSelector.value !== 'text' && shapeSelector.value !== 'select') {
-        let mouseX = event.clientX; let mouseY = event.clientY - 70;
-        let newShape = {
-            type: shapeSelector.value, color: colorPicker.value, lineWidth: lineWidth.value, rotation: 0,
-            x: startX, y: startY, w: mouseX - startX, h: mouseY - startY
-        };
-        if (newShape.type === 'square') {
-            let s = Math.max(Math.abs(newShape.w), Math.abs(newShape.h));
-            newShape.x = mouseX < startX ? startX - s : startX; newShape.y = mouseY < startY ? startY - s : startY;
-            newShape.w = s; newShape.h = s;
-        } else if (newShape.type === 'circle') {
-            let r = distBetween(startX, startY, mouseX, mouseY);
-            newShape.x = startX - r; newShape.y = startY - r; newShape.w = r * 2; newShape.h = r * 2;
+canvas.addEventListener('mouseup', (e) => {
+    if (isDrawing && 
+        shapeSelector.value !== 'brush' && 
+        shapeSelector.value !== 'text' && 
+        shapeSelector.value !== 'select' && 
+        shapeSelector.value !== 'addImage') {
+        
+        let mouseX = e.clientX;
+        let mouseY = e.clientY - 70;
+        
+        let w = mouseX - startX;
+        let h = mouseY - startY;
+
+        if (Math.abs(w) > 5 || Math.abs(h) > 5) {
+            let newShape = {
+                type: shapeSelector.value,
+                color: colorPicker.value,
+                lineWidth: lineWidth.value,
+                rotation: 0,
+                x: startX,
+                y: startY,
+                w: w,
+                h: h
+            };
+
+            if (newShape.type === 'square') {
+                let side = Math.max(Math.abs(w), Math.abs(h));
+                newShape.x = mouseX < startX ? startX - side : startX;
+                newShape.y = mouseY < startY ? startY - side : startY;
+                newShape.w = side;
+                newShape.h = side;
+            } 
+            else if (newShape.type === 'circle') {
+                let r = Math.sqrt(Math.pow(mouseX - startX, 2) + Math.pow(mouseY - startY, 2));
+                newShape.x = startX - r;
+                newShape.y = startY - r;
+                newShape.w = r * 2;
+                newShape.h = r * 2;
+            }
+            else if (newShape.type === 'triangle') {
+              
+            }
+
+            shapes.push(newShape);
+            selectedShape = newShape; 
         }
-        shapes.push(newShape);
     }
-    isDrawing = false; isRotating = false; resizingCorner = null; isDragging = false;
+
+    
+    isDrawing = false;
+    isRotating = false;
+    isDragging = false;
+    resizingCorner = null;
+    shapeBeforeResize = null;
+
     draw();
     saveCanvas();
 });
@@ -355,14 +392,36 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { selectedShape = null; draw(); }
 });
 
+
 function addImage(mouseX, mouseY) {
+    const url = prompt("Paste Image URL here:");
+    if (!url) return;
+
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = 'https://picsum.photos/200/200';
-    img.onload = () => {
-        shapes.push({ type: 'image', img: img, x: mouseX - 100, y: mouseY - 100, w: 200, h: 200, rotation: 0 });
-        draw(); saveCanvas();
+    img.crossOrigin = "anonymous"; //for external links
+    
+    img.onload = function() {
+        console.log("Image loaded successfully!");
+        const newImage = {
+            type: 'image',
+            img: img,
+            x: mouseX - 100,
+            y: mouseY - 100,
+            w: 200,
+            h: 200,
+            rotation: 0
+        };
+        shapes.push(newImage);
+        selectedShape = newImage;
+        draw();
+        saveCanvas();
     };
+
+    img.onerror = function() {
+        alert("Failed to load image. The URL might be broken or blocked by CORS.");
+    };
+
+    img.src = url; 
 }
 
 function saveCanvas() { localStorage.setItem('shapeshift_save', canvas.toDataURL()); }
