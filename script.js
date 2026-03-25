@@ -10,10 +10,13 @@ const themeBtn = document.getElementById('theme-toggle');
 let isDrawing = false;
 let startX, startY;
 let snapshot;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 let shapes = [];
 let undoneShapes = []; 
 let selectedShape = null;
-
+const HANDLE_SIZE = 8; 
+const ROTATE_DIST = 30;
 let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
@@ -23,11 +26,9 @@ let isRotating = false;
 let rotationStartAngle = 0;
 let shapeStartRotation = 0;
 
-const HANDLE_SIZE = 8; 
-const ROTATE_DIST = 30;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+
+
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
