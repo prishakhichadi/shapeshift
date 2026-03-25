@@ -5,6 +5,7 @@ const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
 const lineWidth = document.getElementById('lineWidth');
 const shapeSelector = document.getElementById('shapeSelector');
+const opacitySelector = document.getElementById('opacity'); 
 const clearBtn = document.getElementById('clear');
 const themeBtn = document.getElementById('theme-toggle');
 
@@ -36,7 +37,7 @@ window.addEventListener('resize', () => {
     draw();
 });
 
-//FUNCTIONS
+// --- FUNCTIONS ---
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -44,6 +45,9 @@ function draw() {
     for (let i = 0; i < shapes.length; i++) {
         let s = shapes[i];
         ctx.save();
+
+        
+        ctx.globalAlpha = (s.opacity !== undefined) ? s.opacity / 100 : 1.0;
 
         let cx = s.x + (s.w || 0) / 2;
         let cy = s.y + (s.h || 0) / 2;
@@ -113,6 +117,7 @@ function drawHandles(s) {
     let cx = s.x + s.w / 2;
     let cy = s.y + s.h / 2;
     ctx.save();
+    ctx.globalAlpha = 1.0; 
     ctx.translate(cx, cy);
     ctx.rotate(s.rotation || 0);
     ctx.translate(-cx, -cy);
@@ -130,7 +135,6 @@ function drawHandles(s) {
         ctx.fillRect(c.x - HANDLE_SIZE/2, c.y - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE);
     }
     
-    
     ctx.beginPath();
     ctx.moveTo(cx, s.y);
     ctx.lineTo(cx, s.y - ROTATE_DIST);
@@ -143,8 +147,6 @@ function drawHandles(s) {
     
     ctx.restore();
 }
-
-
 
 function toLocal(s, mx, my) {
     let cx = s.x + (s.w || 0) / 2;
@@ -167,16 +169,15 @@ function isMouseInShape(s, mx, my) {
         let dist = Math.sqrt((local.x - (s.x + s.w / 2))**2 + (local.y - (s.y + s.h / 2))**2);
         return dist <= r;
     }
-
     return local.x >= s.x && local.x <= s.x + s.w && local.y >= s.y && local.y <= s.y + s.h;
 }
 
 function getCorners(s) {
     return [
-        { name: 'nw', x: s.x,       y: s.y       },
-        { name: 'ne', x: s.x + s.w, y: s.y       },
-        { name: 'sw', x: s.x,       y: s.y + s.h },
-        { name: 'se', x: s.x + s.w, y: s.y + s.h },
+        { name: 'nw', x: s.x,y: s.y},
+        { name: 'ne', x: s.x + s.w, y: s.y},
+        { name: 'sw', x: s.x,y: s.y + s.h },
+        { name: 'se', x: s.x + s.w, y: s.y + s.h},
     ];
 }
 
@@ -184,7 +185,51 @@ function isNearHandle(hx, hy, px, py) {
     return Math.abs(px - hx) <= HANDLE_SIZE + 5 && Math.abs(py - hy) <= HANDLE_SIZE + 5;
 }
 
-//LISTENERS
+// --- LISTENERS ---
+
+
+clearBtn.addEventListener('click', () => {
+    if (confirm('Clear everything?')) {
+        shapes = [];        
+        undoneShapes = [];   
+        selectedShape = null;
+        draw();            
+        saveCanvas();     
+    }
+});
+
+window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault();
+
+        if (e.shiftKey) {
+
+            if (undoneShapes.length > 0) {
+                shapes.push(undoneShapes.pop());
+            }
+        } else {
+
+            if (shapes.length > 0) {
+                undoneShapes.push(shapes.pop());
+            }
+        }
+        
+        selectedShape = null; 
+        draw();
+        saveCanvas();
+    }
+
+
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedShape) {
+            shapes = shapes.filter(s => s !== selectedShape);
+            selectedShape = null;
+            draw();
+            saveCanvas();
+        }
+    }
+});
+
 
 canvas.addEventListener('mousedown', (e) => {
     let mouseX = e.clientX;
@@ -227,14 +272,14 @@ canvas.addEventListener('mousedown', (e) => {
         return;
     }
 
-    if (shapeSelector.value === 'text') {
-    }
-
     if (shapeSelector.value !== 'select') {
         selectedShape = null;
         isDrawing = true;
         startX = mouseX;
         startY = mouseY;
+
+        
+        const currentOpacity = parseInt(opacitySelector.value);
 
         if (shapeSelector.value === 'brush') {
             const styleSelector = document.getElementById('brushStyle');
@@ -242,8 +287,9 @@ canvas.addEventListener('mousedown', (e) => {
                        (styleSelector && styleSelector.value === 'dotted') ? [2, 8] : [];
             shapes.push({
                 type: 'brush', points: [{ x: mouseX, y: mouseY }],
-                color: colorPicker.value, lineWidth: parseInt(lineWidth.value), rotation: 0, dash: dash,
-                x: mouseX, y: mouseY //base ref
+                color: colorPicker.value, lineWidth: parseInt(lineWidth.value), 
+                opacity: currentOpacity, rotation: 0, dash: dash,
+                x: mouseX, y: mouseY 
             });
         }
     }
@@ -302,9 +348,12 @@ canvas.addEventListener('mousemove', (e) => {
         draw();
     } else {
         draw();
+
+        ctx.globalAlpha = parseInt(opacitySelector.value) / 100;
         ctx.strokeStyle = colorPicker.value;
         ctx.lineWidth = parseInt(lineWidth.value);
-        ctx.setLineDash([]); // Preview is solid
+        ctx.setLineDash([]); 
+
         if (shapeSelector.value === 'rect') ctx.strokeRect(startX, startY, mouseX - startX, mouseY - startY);
         else if (shapeSelector.value === 'circle') {
             let r = Math.sqrt((mouseX - startX)**2 + (mouseY - startY)**2);
@@ -314,6 +363,7 @@ canvas.addEventListener('mousemove', (e) => {
             let side = Math.max(Math.abs(mouseX - startX), Math.abs(mouseY - startY));
             ctx.strokeRect(mouseX < startX ? startX - side : startX, mouseY < startY ? startY - side : startY, side, side);
         }
+        ctx.globalAlpha = 1.0; 
     }
 });
 
@@ -328,6 +378,7 @@ canvas.addEventListener('mouseup', (e) => {
 
         let newShape = {
             type: shapeSelector.value, color: colorPicker.value, lineWidth: parseInt(lineWidth.value),
+            opacity: parseInt(opacitySelector.value), 
             rotation: 0, dash: dash, x: startX, y: startY, w: mouseX - startX, h: mouseY - startY
         };
 
@@ -350,6 +401,7 @@ canvas.addEventListener('mouseup', (e) => {
     draw();
     saveCanvas();
 });
+
 
 function addImage(mx, my) {
     const url = prompt("Paste Image URL here:");
