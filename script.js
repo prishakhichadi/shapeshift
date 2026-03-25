@@ -1,5 +1,3 @@
-"use strict";
-
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
@@ -29,11 +27,11 @@ const HANDLE_SIZE = 8;
 const ROTATE_DIST = 30;
 
 canvas.width = window.innerWidth;
-canvas.height = window.innerHeight - 70;
+canvas.height = window.innerHeight;
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 70;
+    canvas.height = window.innerHeight;
     draw();
 });
 
@@ -233,7 +231,7 @@ window.addEventListener('keydown', (e) => {
 
 canvas.addEventListener('mousedown', (e) => {
     let mouseX = e.clientX;
-    let mouseY = e.clientY - 70;
+    let mouseY = e.clientY;
 
     if (selectedShape) {
         let local = toLocal(selectedShape, mouseX, mouseY);
@@ -298,7 +296,7 @@ canvas.addEventListener('mousedown', (e) => {
 
 canvas.addEventListener('mousemove', (e) => {
     let mouseX = e.clientX;
-    let mouseY = e.clientY - 70;
+    let mouseY = e.clientY;
 
     if (isRotating && selectedShape) {
         let cx = selectedShape.x + selectedShape.w / 2;
