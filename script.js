@@ -113,13 +113,16 @@ function draw() {
 
 function drawHandles(s) {
     if (s.type === 'brush') return; 
+
     let cx = s.x + s.w / 2;
     let cy = s.y + s.h / 2;
     ctx.save();
-    ctx.globalAlpha = 1.0; 
+    ctx.globalAlpha = 1.0; //selection handles should be fully visible always
     ctx.translate(cx, cy);
     ctx.rotate(s.rotation || 0);
     ctx.translate(-cx, -cy);
+
+    //go to centre, rotate PAPER to match shape rotation, move backk
     
     ctx.strokeStyle = '#0078d7';
     ctx.lineWidth = 1.5;
@@ -127,7 +130,7 @@ function drawHandles(s) {
     ctx.strokeRect(s.x, s.y, s.w, s.h);
     ctx.setLineDash([]);
     
-    let corners = getCorners(s);
+    let corners = getCorners(s);  //j make a fn that returns corners based on shape type, like x,y coords of 4 corners if rect
     for (let c of corners) {
         ctx.fillStyle = 'white';
         ctx.strokeRect(c.x - HANDLE_SIZE/2, c.y - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE);
@@ -170,6 +173,8 @@ function isMouseInShape(s, mx, my) {
     }
     return local.x >= s.x && local.x <= s.x + s.w && local.y >= s.y && local.y <= s.y + s.h;
 }
+//triangle uses rectangle bounding box logic
+//(mx,my) is mouse pos in canvas coords
 
 function getCorners(s) {
     return [
@@ -181,8 +186,28 @@ function getCorners(s) {
 }
 
 function isNearHandle(hx, hy, px, py) {
-    return Math.abs(px - hx) <= HANDLE_SIZE + 5 && Math.abs(py - hy) <= HANDLE_SIZE + 5;
+    return Math.abs(px - hx) <= HANDLE_SIZE + 5 && Math.abs(py - hy) <= HANDLE_SIZE + 5; //handle (hx, hy) and pointer (px, py)
+} //buffer
+
+
+function addImage(mx, my) {
+    const url = prompt("Paste Image URL here:");
+    if (!url) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+        const newImg = { type: 'image', img: img, x: mx - 100, y: my - 100, w: 200, h: 200, rotation: 0 };
+        shapes.push(newImg);
+        selectedShape = newImg;
+        draw();
+        saveCanvas();
+    };
+    img.src = url;
 }
+
+function saveCanvas() { localStorage.setItem('shapeshift_save', canvas.toDataURL()); }
+
+
 
 // --- LISTENERS ---
 
@@ -197,6 +222,8 @@ clearBtn.addEventListener('click', () => {
     }
 });
 
+
+//imp in general
 window.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
@@ -401,20 +428,3 @@ canvas.addEventListener('mouseup', (e) => {
     saveCanvas();
 });
 
-
-function addImage(mx, my) {
-    const url = prompt("Paste Image URL here:");
-    if (!url) return;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-        const newImg = { type: 'image', img: img, x: mx - 100, y: my - 100, w: 200, h: 200, rotation: 0 };
-        shapes.push(newImg);
-        selectedShape = newImg;
-        draw();
-        saveCanvas();
-    };
-    img.src = url;
-}
-
-function saveCanvas() { localStorage.setItem('shapeshift_save', canvas.toDataURL()); }
