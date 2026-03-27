@@ -283,7 +283,7 @@ canvas.addEventListener('mousedown', (e) => {
         }
     }
 
-    let clicked = [...shapes].reverse().find(s => isMouseInShape(s, mouseX, mouseY));
+    let clicked = [...shapes].reverse().find(s => isMouseInShape(s, mouseX, mouseY)); //reverse to select topmost shape if overlapping
     if (clicked) {
         selectedShape = clicked;
         isDragging = true;
@@ -341,7 +341,7 @@ canvas.addEventListener('mousemove', (e) => {
         let snap = shapeBeforeResize;
 
         if (resizingCorner === 'se') {
-            s.w = Math.max(10, local.x - snap.x);
+            s.w = Math.max(10, local.x - snap.x); //min size 10x10
             s.h = Math.max(10, local.y - snap.y);
         } else if (resizingCorner === 'sw') {
             s.x = local.x;
@@ -383,11 +383,21 @@ canvas.addEventListener('mousemove', (e) => {
         if (shapeSelector.value === 'rect') ctx.strokeRect(startX, startY, mouseX - startX, mouseY - startY);
         else if (shapeSelector.value === 'circle') {
             let r = Math.sqrt((mouseX - startX)**2 + (mouseY - startY)**2);
-            ctx.beginPath(); ctx.arc(startX, startY, r, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(startX, startY, r, 0, Math.PI * 2);
+            ctx.stroke();
         }
         else if (shapeSelector.value === 'square') {
             let side = Math.max(Math.abs(mouseX - startX), Math.abs(mouseY - startY));
             ctx.strokeRect(mouseX < startX ? startX - side : startX, mouseY < startY ? startY - side : startY, side, side);
+        }
+        else if (shapeSelector.value === 'triangle') {
+            ctx.beginPath();
+            ctx.moveTo(startX + (mouseX - startX) / 2, startY); 
+            ctx.lineTo(mouseX, mouseY); 
+            ctx.lineTo(startX, mouseY); 
+            ctx.closePath();
+            ctx.stroke();
         }
         ctx.globalAlpha = 1.0; 
     }
@@ -396,7 +406,7 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('mouseup', (e) => {
     if (isDrawing && !['brush', 'text', 'select', 'addImage'].includes(shapeSelector.value)) {
         let mouseX = e.clientX;
-        let mouseY = e.clientY - 70;
+        let mouseY = e.clientY;
         
         const styleSelector = document.getElementById('brushStyle');
         let dash = (styleSelector && styleSelector.value === 'dashed') ? [15, 10] : 
