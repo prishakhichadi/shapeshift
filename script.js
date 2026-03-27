@@ -36,7 +36,7 @@ window.addEventListener('resize', () => {
     draw();
 });
 
-// --- FUNCTIONS ---
+// FUNCTIONS
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -78,7 +78,7 @@ function draw() {
             ctx.stroke();
         }
         else if (s.type === 'text') {
-            ctx.setLineDash([]);
+            ctx.setLineDash([]); //forces back to solid mode for text
             ctx.font = `${s.size}px Inter, sans-serif`;
             ctx.textBaseline = 'top';
             ctx.fillText(s.text, s.x, s.y);
@@ -192,11 +192,20 @@ function isNearHandle(hx, hy, px, py) {
 
 function addImage(mx, my) {
     const url = prompt("Paste Image URL here:");
-    if (!url) return;
+
+    //js doesnt know what url looks like so was taking any input as valid and kept code running so had to define url pattern
+
+    const urlPattern = /^(https?:\/\/)/;
+
+    if (!url || !urlPattern.test(url)) {
+        alert("Invalid URL");
+        return;
+    }
+
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    img.crossOrigin = "anonymous"; //security setting to avoid CORS issues?
     img.onload = () => {
-        const newImg = { type: 'image', img: img, x: mx - 100, y: my - 100, w: 200, h: 200, rotation: 0 };
+        const newImg = { type: 'image', img: img, x: mx - 100, y: my - 100, w: 200, h: 200};
         shapes.push(newImg);
         selectedShape = newImg;
         draw();
@@ -207,6 +216,43 @@ function addImage(mx, my) {
 
 function saveCanvas() { localStorage.setItem('shapeshift_save', canvas.toDataURL()); }
 
+
+function addText(x, y, w, h) {
+    const input = document.createElement('textarea');
+    
+    input.style.position = 'fixed';
+    input.style.left = x + 'px';
+    input.style.top = y + 'px';
+    input.style.width = Math.max(w, 100) + 'px';
+    input.style.height = Math.max(h, 40) + 'px';
+    
+    input.style.color = colorPicker.value;
+    input.style.fontSize = lineWidth.value * 5 + 'px';  //using size slider only for font size
+    input.style.background = 'transparent';
+    input.style.border = '1px dashed #0078d7';
+    input.style.outline = 'none';
+    
+    document.body.appendChild(input);
+
+    input.addEventListener('blur', () => {
+        if (input.value.trim() !== "") {
+            shapes.push({
+                type: 'text',
+                text: input.value,
+                x: x,
+                y: y,
+                w: input.offsetWidth,
+                h: input.offsetHeight,
+                size: parseInt(input.style.fontSize),
+                color: colorPicker.value,
+                opacity: parseInt(opacitySelector.value)
+            });
+        }
+        input.remove(); 
+        draw();
+        saveCanvas();
+    });
+}
 
 
 // --- LISTENERS ---
@@ -398,6 +444,10 @@ canvas.addEventListener('mousemove', (e) => {
             ctx.lineTo(startX, mouseY); 
             ctx.closePath();
             ctx.stroke();
+        }        
+        else if (shapeSelector.value === 'text') {
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(startX, startY, mouseX - startX, mouseY - startY);
         }
         ctx.globalAlpha = 1.0; 
     }
@@ -428,11 +478,29 @@ canvas.addEventListener('mouseup', (e) => {
         } else if (newShape.type === 'triangle') {
             newShape.x = Math.min(startX, mouseX); newShape.y = Math.min(startY, mouseY);
             newShape.w = Math.abs(mouseX - startX); newShape.h = Math.abs(mouseY - startY);
-        }
+        } else if (newShape.type === 'text') {
+            addText(startX, startY, mouseX - startX, mouseY - startY);
+            isDrawing = false;
+            return; 
+        } //check why this isnt working??? had to access from outside 
+        
         
         shapes.push(newShape);
         selectedShape = newShape;
     }
+
+    if (isDrawing && shapeSelector.value === 'text') {
+        let mouseX = e.clientX;
+        let mouseY = e.clientY;
+        
+
+        addText(startX, startY, mouseX - startX, mouseY - startY);
+        
+        isDrawing = false; 
+        draw();
+        return; 
+    }
+
     isDrawing = isRotating = resizingCorner = isDragging = false;
     draw();
     saveCanvas();
