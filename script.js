@@ -6,6 +6,9 @@ const shapeSelector = document.getElementById('shapeSelector');
 const opacitySelector = document.getElementById('opacity'); 
 const clearBtn = document.getElementById('clear');
 const themeBtn = document.getElementById('theme-toggle');
+let togglebox=document.querySelector(".toggle-box")
+let circle=document.querySelector(".circle")
+const checkbox = document.getElementById("checkbox");
 
 let isDrawing = false;
 let startX, startY;
@@ -25,6 +28,7 @@ let shapeBeforeResize = null;
 let isRotating = false;
 let rotationStartAngle = 0;
 let shapeStartRotation = 0;
+
 
 
 
@@ -220,7 +224,7 @@ function addImage(mx, my) {
     img.src = url;
 }
 
-function saveCanvas() { localStorage.setItem('shapeshift_save', canvas.toDataURL()); }
+function saveCanvas() { localStorage.setItem('shapeshift_save_data', JSON.stringify(shapes)); }
 
 
 function addText(x, y, w, h) {
@@ -513,19 +517,11 @@ canvas.addEventListener('mouseup', (e) => {
 });
 
 
-//toggle button
-
-let togglebox=document.querySelector(".toggle-box")
-let circle=document.querySelector(".circle")
-const checkbox = document.getElementById("checkbox");
-
-// 1. Check for saved theme on page load
-if (localStorage.getItem('theme') === 'dark') {
+if (localStorage.getItem('theme') === 'dark') { //darkmode
     checkbox.checked = true;
     document.body.classList.add('dark-theme');
 }
 
-// 2. Listen for the toggle
 checkbox.addEventListener('change', () => {
     if (checkbox.checked) {
         document.body.classList.add('dark-theme');
@@ -535,6 +531,5 @@ checkbox.addEventListener('change', () => {
         localStorage.setItem('theme', 'light');
     }
     
-    // 3. Redraw your canvas to match the new background
-    if (typeof draw === "function") draw();
+    draw();
 });
