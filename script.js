@@ -41,6 +41,12 @@ window.addEventListener('resize', () => {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    //darkmode
+
+    const isDark = document.body.classList.contains('dark-theme');
+    ctx.fillStyle = isDark ? '#1e1e1e' : '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     for (let i = 0; i < shapes.length; i++) {
         let s = shapes[i];
         ctx.save();
@@ -234,7 +240,7 @@ function addText(x, y, w, h) {
     
     document.body.appendChild(input);
 
-    input.addEventListener('blur', () => {
+    input.addEventListener('blur', () => { //called blur cause element loses focus when user clicks away
         if (input.value.trim() !== "") {
             shapes.push({
                 type: 'text',
@@ -255,7 +261,7 @@ function addText(x, y, w, h) {
 }
 
 
-// --- LISTENERS ---
+//LISTENERS 
 
 
 clearBtn.addEventListener('click', () => {
@@ -506,3 +512,29 @@ canvas.addEventListener('mouseup', (e) => {
     saveCanvas();
 });
 
+
+//toggle button
+
+let togglebox=document.querySelector(".toggle-box")
+let circle=document.querySelector(".circle")
+const checkbox = document.getElementById("checkbox");
+
+// 1. Check for saved theme on page load
+if (localStorage.getItem('theme') === 'dark') {
+    checkbox.checked = true;
+    document.body.classList.add('dark-theme');
+}
+
+// 2. Listen for the toggle
+checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+        document.body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('theme', 'light');
+    }
+    
+    // 3. Redraw your canvas to match the new background
+    if (typeof draw === "function") draw();
+});
