@@ -619,16 +619,19 @@ canvas.addEventListener('mouseup', (e) => {
 
     if (isDrawing && shapeSelector.value === 'brush') {
         let lastStroke = shapes[shapes.length - 1];
+        if (lastStroke.points.length > 0) {
+            let xs = lastStroke.points.map(p => p.x);
+            let ys = lastStroke.points.map(p => p.y);
         
-        let minX = Math.min(...lastStroke.points.map(p => p.x));
-        let maxX = Math.max(...lastStroke.points.map(p => p.x));
-        let minY = Math.min(...lastStroke.points.map(p => p.y));
-        let maxY = Math.max(...lastStroke.points.map(p => p.y));
+            let minX = Math.min(...lastStroke.points.map(p => p.x));
+            let maxX = Math.max(...lastStroke.points.map(p => p.x));
+            let minY = Math.min(...lastStroke.points.map(p => p.y));
+            let maxY = Math.max(...lastStroke.points.map(p => p.y));
 
-        lastStroke.x = minX;
-        lastStroke.y = minY;
-        lastStroke.w = maxX - minX;
-        lastStroke.h = maxY - minY;
+            lastStroke.x = minX;
+            lastStroke.y = minY;
+            lastStroke.w = maxX - minX;
+            lastStroke.h = maxY - minY;}
     }
 
     if (isDrawing && !['brush','text', 'select', 'addImage'].includes(shapeSelector.value)) {
@@ -660,8 +663,9 @@ canvas.addEventListener('mouseup', (e) => {
 
     
     if (isDrawing && shapeSelector.value === 'text') {
-        let mouseX = e.clientX;
-        let mouseY = e.clientY;
+        const pos = getMousePos(e);
+        let mouseX = pos.x;
+        let mouseY = pos.y;
         
         addText(startX, startY, mouseX - startX, mouseY - startY);
 
@@ -717,8 +721,9 @@ toolButtons.forEach(btn => {
 
 
 canvas.addEventListener('dblclick',(e) => {
-    let mouseX = e.clientX;
-    let mouseY = e.clientY;
+        const pos = getMousePos(e);
+        let mouseX = pos.x;
+        let mouseY = pos.y;
 
     let clickedText = [...shapes].reverse().find (s => s.type === 'text' && isMouseInShape(s, mouseX, mouseY));
     //reverse shallow copy only!

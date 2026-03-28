@@ -135,9 +135,13 @@ button:hover {
 
 
 #canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
     display: block;
     background-color: white;
     cursor: crosshair;
+    z-index: 1;
 }
 
 .landing-container {
