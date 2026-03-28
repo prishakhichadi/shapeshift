@@ -62,46 +62,33 @@ function draw() {
         
         ctx.globalAlpha = (s.opacity !== undefined) ? s.opacity / 100 : 1.0;
 
-        let cx = s.x + (s.w || 0) / 2;
-        let cy = s.y + (s.h || 0) / 2;
-        
-        if (s.type !== 'brush') {
-            ctx.translate(cx, cy);
-            ctx.rotate(s.rotation || 0);
-            ctx.translate(-cx, -cy);
-        }
-
         ctx.lineCap = 'round';   
         ctx.lineJoin = 'round';
         ctx.lineWidth = s.lineWidth || 2;
         ctx.strokeStyle = s.color;
         ctx.fillStyle = s.color;
 
-        if (s.dash && s.dash.length > 0) {
-            ctx.setLineDash(s.dash);
-        } else {
-            ctx.setLineDash([]);
+        if (s.dash && s.dash.length > 0) ctx.setLineDash(s.dash);
+        else ctx.setLineDash([]);
+
+        if (s.type !== 'brush' && s.type !== 'triangle') {
+            let cx = s.x + (s.w || 0) / 2;
+            let cy = s.y + (s.h || 0) / 2;
+            ctx.translate(cx, cy);
+            ctx.rotate(s.rotation || 0);
+            ctx.translate(-cx, -cy);
         }
 
-
         if (s.type === 'brush') {
-
             if (s.points && s.points.length > 0) {
-                ctx.save();
-                
-                if (s.x !== undefined) {
-                    ctx.translate(s.x - s.points[0].x, s.y - s.points[0].y); 
-                }
-
                 ctx.beginPath();
                 ctx.moveTo(s.points[0].x, s.points[0].y);
                 for (let j = 1; j < s.points.length; j++) {
                     ctx.lineTo(s.points[j].x, s.points[j].y);
                 }
                 ctx.stroke();
-                ctx.restore();
             }
-        } 
+        }
 
         else if (s.type === 'text') {
             ctx.setLineDash([]); 
