@@ -71,23 +71,20 @@ function draw() {
         if (s.dash && s.dash.length > 0) ctx.setLineDash(s.dash);
         else ctx.setLineDash([]);
 
-        if (s.type !== 'brush' && s.type !== 'triangle') {
-            let cx = s.x + (s.w || 0) / 2;
-            let cy = s.y + (s.h || 0) / 2;
-            ctx.translate(cx, cy);
-            ctx.rotate(s.rotation || 0);
-            ctx.translate(-cx, -cy);
-        }
+        //this is for rot of strokes and triangles (if this works)
+        let cx = s.x + (s.w || 0) / 2;
+        let cy = s.y + (s.h || 0) / 2;
+        ctx.translate(cx, cy);
+        ctx.rotate(s.rotation || 0);
+        ctx.translate(-cx, -cy);
 
         if (s.type === 'brush') {
-            if (s.points && s.points.length > 0) {
-                ctx.beginPath();
-                ctx.moveTo(s.points[0].x, s.points[0].y);
-                for (let j = 1; j < s.points.length; j++) {
-                    ctx.lineTo(s.points[j].x, s.points[j].y);
-                }
-                ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(s.points[0].x, s.points[0].y);
+            for (let j = 1; j < s.points.length; j++) {
+                ctx.lineTo(s.points[j].x, s.points[j].y);
             }
+            ctx.stroke();
         }
 
         else if (s.type === 'text') {
@@ -543,13 +540,33 @@ canvas.addEventListener('mousemove', (e) => {
             s.w = Math.max(10, (snap.x + snap.w) - local.x);
             s.h = Math.max(10, (snap.y + snap.h) - local.y);
         }
+
+        if (s.points && oldW !== 0 && oldH !== 0) {
+            let scaleX = s.w / oldW;
+            let scaleY = s.h / oldH;
+            s.points.forEach(p => {
+                p.x = s.x + (p.x - oldX) * scaleX;
+                p.y = s.y + (p.y - oldY) * scaleY;
+            });
+        }
+
         draw();
         return;
     }
 
     if (isDragging && selectedShape) {
-        selectedShape.x = mouseX - dragOffsetX;
-        selectedShape.y = mouseY - dragOffsetY;
+        let dx = mouseX - dragOffsetX - selectedShape.x;
+        let dy = mouseY - dragOffsetY - selectedShape.y;
+
+        selectedShape.x += dx;
+        selectedShape.y += dy;
+
+        if (selectedShape.points) {
+            selectedShape.points.forEach(p => {
+                p.x += dx;
+                p.y += dy;
+            });
+        }
         draw();
         return;
     }
@@ -619,6 +636,8 @@ canvas.addEventListener('mouseup', (e) => {
             lastStroke.y = minY;
             lastStroke.w = maxX - minX;
             lastStroke.h = maxY - minY;}
+
+            
     }
 
     if (isDrawing && !['brush','text', 'select', 'addImage'].includes(shapeSelector.value)) {
