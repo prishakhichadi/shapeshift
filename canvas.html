@@ -18,7 +18,7 @@
             <label for="lineWidth">Size</label>
             <input type="range" id="lineWidth" min="1" max="25" value="5">
         </div>
-
+<!--
         <div class="tool-group">
             <label for="shapeSelector">Tool</label>
             <select id="shapeSelector">
@@ -32,12 +32,12 @@
                 <option value="text">Text Box</option>
             </select>
         </div>
-
+-->
         <div class="tool-group">
             <label for="opacity">Opacity:</label>
             <input type="range" id="opacity" min="0" max="100" value="100">
         </div>
-
+<!--
         <div class="tool-group">
             <select id="brushStyle">
                 <option value="solid">Solid</option>
@@ -45,7 +45,7 @@
                 <option value="dotted">Dotted</option>
             </select>
         </div>
-
+-->
         <div class="tool-group">
             <label class="toggle-box">
                 <input type="checkbox" id="checkbox">
@@ -53,7 +53,29 @@
             </label>
         </div>
 
+    </div>
 
+    <div id="sidebar">
+
+        <div class="sidebar-group">
+            <button class="tool-btn active" data-shape="solid">🖌️</button>
+            <button class="tool-btn" data-shape="dashed">🖌️</button>
+            <button class="tool-btn" data-shape="dotted">🖌️</button>
+        </div>
+
+        <div class="sidebar-group">
+            <button class="tool-btn active" data-shape="square">▢</button>
+            <button class="tool-btn" data-shape="rect">▢</button>
+            <button class="tool-btn" data-shape="circle">○</button>
+            <button class="tool-btn" data-shape="triangle">△</button>
+        </div>
+
+        <div class="sidebar-last-group">
+            <button class="tool-btn active" data-shape="select">🖌️</button>
+            <button class="tool-btn" data-shape="image">▢</button>
+            <button class="tool-btn" data-shape="text box">○</button>
+        </div>
+      
     </div>
 
     <canvas id="canvas"></canvas>

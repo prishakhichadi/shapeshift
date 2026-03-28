@@ -2,16 +2,19 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const colorPicker = document.getElementById('colorPicker');
 const lineWidth = document.getElementById('lineWidth');
-const shapeSelector = document.getElementById('shapeSelector');
 const opacitySelector = document.getElementById('opacity'); 
 const clearBtn = document.getElementById('clear');
 const themeBtn = document.getElementById('theme-toggle');
 let togglebox=document.querySelector(".toggle-box")
 let circle=document.querySelector(".circle")
 const checkbox = document.getElementById("checkbox");
+const toolButtons = document.querySelectorAll('.tool-btn');
+
 
 let isDrawing = false;
 let startX, startY;
+let shapeSelector = { value: 'brush' }; 
+let brushStyle = { value: 'solid' }; 
 let snapshot;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -411,17 +414,22 @@ canvas.addEventListener('mousedown', (e) => {
         
         const currentOpacity = parseInt(opacitySelector.value);
 
+        
         if (shapeSelector.value === 'brush') {
-            const styleSelector = document.getElementById('brushStyle');
-            let dash = (styleSelector && styleSelector.value === 'dashed') ? [15, 10] : 
-                       (styleSelector && styleSelector.value === 'dotted') ? [2, 8] : [];
+            let dash = (brushStyle.value === 'dashed') ? [15, 10] : 
+                    (brushStyle.value === 'dotted') ? [2, 8] : [];
+            
             shapes.push({
-                type: 'brush', points: [{ x: mouseX, y: mouseY }],
-                color: colorPicker.value, lineWidth: parseInt(lineWidth.value), 
-                opacity: currentOpacity, rotation: 0, dash: dash,
+                type: 'brush', 
+                points: [{ x: mouseX, y: mouseY }],
+                color: colorPicker.value, 
+                lineWidth: parseInt(lineWidth.value), 
+                opacity: parseInt(opacitySelector.value), 
+                rotation: 0, 
+                dash: dash,
                 x: mouseX, y: mouseY 
-            });
-        }
+    });
+}
     }
     draw();
 });
@@ -582,4 +590,31 @@ checkbox.addEventListener('change', () => {
     draw();
 });
 
-//test
+
+
+toolButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const parent = btn.parentElement;
+        const value = btn.getAttribute('data-shape');
+
+        // Toggle active class within the specific sidebar group
+        parent.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Logic to update our "Proxy" variables
+        if (parent.classList.contains('sidebar1')) {
+            brushStyle.value = value; // Updates solid/dash/dot
+            shapeSelector.value = 'brush'; // Forces tool to brush when style is picked
+        } else {
+            // Mapping for special names
+            if (value === 'text box') shapeSelector.value = 'text';
+            else if (value === 'image') shapeSelector.value = 'addImage';
+            else shapeSelector.value = value;
+            
+            tempTriPoints = []; // Reset triangle if switching tools
+        }
+        
+        draw(); 
+    });
+});
+
