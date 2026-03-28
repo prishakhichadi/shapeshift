@@ -222,7 +222,6 @@ input[type="checkbox"]:checked + .circle::after {
 
 /*sidebar*/
 
-/* Keep your existing #toolbar styles, then add this: */
 
 #sidebar {
     position: fixed;
@@ -230,7 +229,7 @@ input[type="checkbox"]:checked + .circle::after {
     left: 20px;
     transform: translateY(-50%);
     display: flex;
-    flex-direction: column; /* Stacked vertically */
+    flex-direction: column; 
     padding: 10px 10px;
     
     background: rgba(28, 28, 28, 0.85);

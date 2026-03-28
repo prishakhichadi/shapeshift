@@ -264,7 +264,9 @@ function saveCanvas() { localStorage.setItem('shapeshift_save_data', JSON.string
 
 function addText(x, y, w, h) {
     const input = document.createElement('textarea');
-    
+
+    input.style.zIndex='2000';
+
     input.style.position = 'fixed';
     input.style.left = x + 'px';
     input.style.top = y + 'px';
@@ -316,6 +318,8 @@ clearBtn.addEventListener('click', () => {
 
 //imp in general
 window.addEventListener('keydown', (e) => {
+
+
     if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
         e.preventDefault();
 
@@ -349,6 +353,8 @@ window.addEventListener('keydown', (e) => {
 
 
 canvas.addEventListener('mousedown', (e) => {
+
+
     let mouseX = e.clientX;
     let mouseY = e.clientY;
 
@@ -414,6 +420,7 @@ canvas.addEventListener('mousedown', (e) => {
     if (isBrushTool) {
         isDrawing = true;
         selectedShape = null;
+        
         const currentColor = colorPicker.value;
         let dashPattern = []; 
         if (brushStyle.value === 'dashed') dashPattern = [15, 10];
@@ -554,12 +561,7 @@ canvas.addEventListener('mouseup', (e) => {
         } else if (newShape.type === 'triangle') {
             newShape.x = Math.min(startX, mouseX); newShape.y = Math.min(startY, mouseY);
             newShape.w = Math.abs(mouseX - startX); newShape.h = Math.abs(mouseY - startY);
-        } else if (newShape.type === 'text') {
-            addText(startX, startY, mouseX - startX, mouseY - startY);
-            isDrawing = false;
-            return; 
-        } //check why this isnt working??? had to access from outside 
-        
+        } 
         
         shapes.push(newShape);
         selectedShape = newShape;
@@ -569,12 +571,8 @@ canvas.addEventListener('mouseup', (e) => {
         let mouseX = e.clientX;
         let mouseY = e.clientY;
         
-
         addText(startX, startY, mouseX - startX, mouseY - startY);
-        
-        isDrawing = false; 
-        draw();
-        return; 
+       
     }
 
     isDrawing = isRotating = resizingCorner = isDragging = false;
@@ -615,7 +613,6 @@ toolButtons.forEach(btn => {
             brushStyle.value = value; 
             shapeSelector.value = 'brush'; 
         } else {
-            // Mapping for the "Action" buttons
             if (value === 'text box') shapeSelector.value = 'text';
             else if (value === 'image') shapeSelector.value = 'addImage';
             else shapeSelector.value = value;
