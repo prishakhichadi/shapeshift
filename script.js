@@ -77,7 +77,9 @@ function draw() {
         ctx.strokeStyle = s.color;
         ctx.fillStyle = s.color;
 
-        if (s.dash && s.dash.length > 0) {
+        if (s.type === 'brush' && s.dash) {
+            ctx.setLineDash(s.dash);
+        } else if (s.dash && s.dash.length > 0) {
             ctx.setLineDash(s.dash);
         } else {
             ctx.setLineDash([]);
@@ -371,7 +373,7 @@ canvas.addEventListener('mousedown', (e) => {
         }
     }
 
-    let clicked = [...shapes].reverse().find(s => isMouseInShape(s, mouseX, mouseY)); //reverse to select topmost shape if overlapping
+    let clicked = [...shapes].reverse().find(s => isMouseInShape(s, mouseX, mouseY));
     if (clicked) {
         selectedShape = clicked;
         isDragging = true;
@@ -380,6 +382,7 @@ canvas.addEventListener('mousedown', (e) => {
         draw();
         return;
     }
+
 
     if (shapeSelector.value === 'addImage') {
         addImage(mouseX, mouseY);
@@ -392,12 +395,12 @@ canvas.addEventListener('mousedown', (e) => {
         if (tempTriPoints.length === 3) {
             shapes.push({
                 type: 'triangle',
-                points: [...tempTriPoints], //use shallow copy, new triangle will ow disturb old triangle
+                points: [...tempTriPoints],
                 color: colorPicker.value,
                 lineWidth: parseInt(lineWidth.value),
                 opacity: parseInt(opacitySelector.value)
             });
-            tempTriPoints = []; //we reset for next triangle
+            tempTriPoints = [];
             saveCanvas();
         }
         draw();
@@ -405,33 +408,39 @@ canvas.addEventListener('mousedown', (e) => {
     }
 
 
+    const isBrushTool = shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value);
+    
+    if (isBrushTool) {
+        isDrawing = true;
+        
+        let dashPattern = []; 
+        if (brushStyle.value === 'dashed') dashPattern = [15, 10];
+        else if (brushStyle.value === 'dotted') dashPattern = [2, 8];
+
+        shapes.push({
+            type: 'brush', 
+            points: [{ x: mouseX, y: mouseY }],
+            color: colorPicker.value, 
+            lineWidth: parseInt(lineWidth.value), 
+            opacity: parseInt(opacitySelector.value) / 100, 
+            dash: dashPattern, 
+            x: mouseX, y: mouseY 
+        });
+        draw();
+        return;
+    }
+
+    // 6. Handle Standard Shapes (Rect, Circle, Square, Text)
     if (shapeSelector.value !== 'select') {
         selectedShape = null;
         isDrawing = true;
         startX = mouseX;
         startY = mouseY;
-
-        
-        const currentOpacity = parseInt(opacitySelector.value);
-
-        
-        if (shapeSelector.value === 'brush') {
-            let dash = (brushStyle.value === 'dashed') ? [15, 10] : 
-                    (brushStyle.value === 'dotted') ? [2, 8] : [];
-            
-            shapes.push({
-                type: 'brush', 
-                points: [{ x: mouseX, y: mouseY }],
-                color: colorPicker.value, 
-                lineWidth: parseInt(lineWidth.value), 
-                opacity: parseInt(opacitySelector.value), 
-                dash: dash,
-                x: mouseX, y: mouseY 
-    });
-}
     }
+
     draw();
 });
+
 
 canvas.addEventListener('mousemove', (e) => {
     let mouseX = e.clientX;
@@ -480,11 +489,14 @@ canvas.addEventListener('mousemove', (e) => {
 
     if (!isDrawing) return;
 
-    if (shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value)) {
-        shapes[shapes.length - 1].points.push({ x: mouseX, y: mouseY });
-        draw();
-    } else {
-        draw();
+    const isBrushTool = shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value);
+
+        if (isBrushTool) {
+            shapes[shapes.length - 1].points.push({ x: mouseX, y: mouseY });
+            draw(); 
+        } 
+        else {
+            draw(); 
 
         ctx.globalAlpha = parseInt(opacitySelector.value) / 100;
         ctx.strokeStyle = colorPicker.value;
@@ -523,9 +535,7 @@ canvas.addEventListener('mouseup', (e) => {
         let mouseX = e.clientX;
         let mouseY = e.clientY;
         
-        const styleSelector = document.getElementById('brushStyle');
-        let dash = (styleSelector && styleSelector.value === 'dashed') ? [15, 10] : 
-                   (styleSelector && styleSelector.value === 'dotted') ? [2, 8] : [];
+        let dash = (brushStyle.value === 'dashed') ? [15, 10] : (brushStyle.value === 'dotted') ? [2, 8] : [];
 
         let newShape = {
             type: shapeSelector.value, color: colorPicker.value, lineWidth: parseInt(lineWidth.value),
@@ -599,18 +609,18 @@ toolButtons.forEach(btn => {
         parent.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        if (parent.classList.contains('sidebar1')) {
+        
+        if (['solid', 'dashed', 'dotted'].includes(value)) {
             brushStyle.value = value; 
             shapeSelector.value = 'brush'; 
         } else {
-
+            // Mapping for the "Action" buttons
             if (value === 'text box') shapeSelector.value = 'text';
             else if (value === 'image') shapeSelector.value = 'addImage';
             else shapeSelector.value = value;
             
             tempTriPoints = [];
         }
-        
         draw(); 
     });
 });
