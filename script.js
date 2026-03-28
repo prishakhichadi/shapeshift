@@ -292,7 +292,50 @@ function addText(x, y, w, h) {
                 h: input.offsetHeight,
                 size: parseInt(input.style.fontSize),
                 color: colorPicker.value,
-                opacity: parseInt(opacitySelector.value)
+                opacity: parseInt(opacitySelector.value),
+                textAlign:'center'
+            });
+        }
+        input.remove(); 
+        draw();
+        saveCanvas();
+    });
+}
+
+
+function editText(shape) {
+    const input = document.createElement('textarea');
+    
+    input.style.position = 'fixed';
+    input.style.left = shape.x + 'px';
+    input.style.top = shape.y + 'px';
+    input.style.width = shape.w + 'px';
+    input.style.height = shape.h + 'px';
+    
+    input.style.color = shape.color;
+    input.style.fontSize = shape.size + 'px';
+    input.value = shape.text; 
+    
+    input.style.background = 'rgba(255, 255, 255, 0.1)';
+    input.style.border = '2px solid #0078d7';
+    input.style.outline = 'none';
+    input.style.zIndex = '5000';
+    
+    document.body.appendChild(input);
+    
+    setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }, 50);
+
+    input.addEventListener('blur', () => {
+        if (input.value.trim() !== "") {
+            shapes.push({
+                ...shape, //orig
+                text: input.value,
+                w: input.offsetWidth,
+                h: input.offsetHeight,
+                textAlign:'center'
             });
         }
         input.remove(); 
@@ -354,6 +397,7 @@ window.addEventListener('keydown', (e) => {
 
 canvas.addEventListener('mousedown', (e) => {
 
+    if (e.target.tagName === 'TEXTAREA') return;
 
     let mouseX = e.clientX;
     let mouseY = e.clientY;
@@ -623,3 +667,21 @@ toolButtons.forEach(btn => {
     });
 });
 
+
+canvas.addEventListener('dblclick',(e) => {
+    let mouseX = e.clientX;
+    let mouseY = e.clientY;
+
+    let clickedText = [...shapes].reverse().find (s => s.type === 'text' && isMouseInShape(s, mouseX, mouseY));
+    //reverse shallow copy only!
+
+    if (clickedText){
+        shapes = shapes.filter(s => s !== clickedText);
+
+        editText(clickedText);
+        draw();
+        saveCanvas();
+    }
+
+
+});
