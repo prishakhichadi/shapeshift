@@ -425,7 +425,6 @@ canvas.addEventListener('mousedown', (e) => {
                 color: colorPicker.value, 
                 lineWidth: parseInt(lineWidth.value), 
                 opacity: parseInt(opacitySelector.value), 
-                rotation: 0, 
                 dash: dash,
                 x: mouseX, y: mouseY 
     });
@@ -481,7 +480,7 @@ canvas.addEventListener('mousemove', (e) => {
 
     if (!isDrawing) return;
 
-    if (shapeSelector.value === 'brush') {
+    if (shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value)) {
         shapes[shapes.length - 1].points.push({ x: mouseX, y: mouseY });
         draw();
     } else {
@@ -597,21 +596,19 @@ toolButtons.forEach(btn => {
         const parent = btn.parentElement;
         const value = btn.getAttribute('data-shape');
 
-        // Toggle active class within the specific sidebar group
         parent.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Logic to update our "Proxy" variables
         if (parent.classList.contains('sidebar1')) {
-            brushStyle.value = value; // Updates solid/dash/dot
-            shapeSelector.value = 'brush'; // Forces tool to brush when style is picked
+            brushStyle.value = value; 
+            shapeSelector.value = 'brush'; 
         } else {
-            // Mapping for special names
+
             if (value === 'text box') shapeSelector.value = 'text';
             else if (value === 'image') shapeSelector.value = 'addImage';
             else shapeSelector.value = value;
             
-            tempTriPoints = []; // Reset triangle if switching tools
+            tempTriPoints = [];
         }
         
         draw(); 
