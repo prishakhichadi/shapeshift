@@ -59,7 +59,6 @@ function draw() {
     for (let i = 0; i < shapes.length; i++) {
         let s = shapes[i];
         ctx.save();
-
         
         ctx.globalAlpha = (s.opacity !== undefined) ? s.opacity / 100 : 1.0;
 
@@ -78,28 +77,40 @@ function draw() {
         ctx.strokeStyle = s.color;
         ctx.fillStyle = s.color;
 
-        if (s.type === 'brush' && s.dash) {
-            ctx.setLineDash(s.dash);
-        } else if (s.dash && s.dash.length > 0) {
+        if (s.dash && s.dash.length > 0) {
             ctx.setLineDash(s.dash);
         } else {
             ctx.setLineDash([]);
         }
 
+
         if (s.type === 'brush') {
-            ctx.beginPath();
-            ctx.moveTo(s.points[0].x, s.points[0].y);
-            for (let j = 1; j < s.points.length; j++) {
-                ctx.lineTo(s.points[j].x, s.points[j].y);
+
+            if (s.points && s.points.length > 0) {
+                ctx.save();
+                
+                if (s.x !== undefined) {
+                    ctx.translate(s.x - s.points[0].x, s.y - s.points[0].y); 
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(s.points[0].x, s.points[0].y);
+                for (let j = 1; j < s.points.length; j++) {
+                    ctx.lineTo(s.points[j].x, s.points[j].y);
+                }
+                ctx.stroke();
+                ctx.restore();
             }
-            ctx.stroke();
-        }
+        } 
+
         else if (s.type === 'text') {
-            ctx.setLineDash([]); //forces back to solid mode for text
+            ctx.setLineDash([]); 
             ctx.font = `${s.size}px Inter, sans-serif`;
             ctx.textBaseline = 'top';
             ctx.fillText(s.text, s.x, s.y);
         }
+
+
         else if (s.type === 'image') {
             ctx.drawImage(s.img, s.x, s.y, s.w, s.h);
         }
@@ -157,7 +168,6 @@ function draw() {
 }
 
 function drawHandles(s) {
-    if (s.type === 'brush') return; 
 
     let cx = s.x + s.w / 2;
     let cy = s.y + s.h / 2;
@@ -208,8 +218,12 @@ function toLocal(s, mx, my) {
 }
 
 function isMouseInShape(s, mx, my) {
-    if (s.type === 'brush') return false; 
+
     let local = toLocal(s, mx, my);
+
+    if (s.type === 'brush') {
+        return local.x >= s.x - 10 && local.x <= s.x + s.w + 10 && local.y >= s.y - 10 && local.y <= s.y + s.h + 10;
+    }
     
     if (s.type === 'circle') {
         let r = Math.abs(s.w / 2);
@@ -394,14 +408,40 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-
 canvas.addEventListener('mousedown', (e) => {
-
     if (e.target.tagName === 'TEXTAREA') return;
 
     let mouseX = e.clientX;
     let mouseY = e.clientY;
 
+    const isBrushTool = shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value);
+
+    if (isBrushTool) {
+        isDrawing = true;
+        selectedShape = null; 
+        
+        let dashPattern = []; 
+        if (brushStyle.value === 'dashed') dashPattern = [15, 10];
+        else if (brushStyle.value === 'dotted') dashPattern = [2, 8];
+
+        shapes.push({
+            type: 'brush', 
+            points: [{ x: mouseX, y: mouseY }],
+            color: colorPicker.value, 
+            lineWidth: parseInt(lineWidth.value), 
+            opacity: parseInt(opacitySelector.value), 
+            dash: dashPattern, 
+            x: mouseX, 
+            y: mouseY,
+            w: 0, 
+            h: 0,
+            rotation: 0
+        });
+        draw();
+        return; 
+    }
+
+    //only runs if Brush is NOT active
     if (selectedShape) {
         let local = toLocal(selectedShape, mouseX, mouseY);
         let cx = selectedShape.x + selectedShape.w / 2;
@@ -434,12 +474,10 @@ canvas.addEventListener('mousedown', (e) => {
         return;
     }
 
-
     if (shapeSelector.value === 'addImage') {
-        addImage(mouseX, mouseY);
+        showImageUI(mouseX, mouseY); 
         return;
     }
-
 
     if (shapeSelector.value === 'triangle') {
         tempTriPoints.push({ x: mouseX, y: mouseY });
@@ -449,36 +487,15 @@ canvas.addEventListener('mousedown', (e) => {
                 points: [...tempTriPoints],
                 color: colorPicker.value,
                 lineWidth: parseInt(lineWidth.value),
-                opacity: parseInt(opacitySelector.value)
+                opacity: parseInt(opacitySelector.value),
+                x: Math.min(...tempTriPoints.map(p => p.x)), // Add bounds for selection
+                y: Math.min(...tempTriPoints.map(p => p.y)),
+                w: Math.max(...tempTriPoints.map(p => p.x)) - Math.min(...tempTriPoints.map(p => p.x)),
+                h: Math.max(...tempTriPoints.map(p => p.y)) - Math.min(...tempTriPoints.map(p => p.y))
             });
             tempTriPoints = [];
             saveCanvas();
         }
-        draw();
-        return;
-    }
-
-
-    const isBrushTool = shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value);
-    
-    if (isBrushTool) {
-        isDrawing = true;
-        selectedShape = null;
-        
-        const currentColor = colorPicker.value;
-        let dashPattern = []; 
-        if (brushStyle.value === 'dashed') dashPattern = [15, 10];
-        else if (brushStyle.value === 'dotted') dashPattern = [2, 8];
-
-        shapes.push({
-            type: 'brush', 
-            points: [{ x: mouseX, y: mouseY }],
-            color: colorPicker.value, 
-            lineWidth: parseInt(lineWidth.value), 
-            opacity: parseInt(opacitySelector.value), 
-            dash: dashPattern, 
-            x: mouseX, y: mouseY 
-        });
         draw();
         return;
     }
@@ -546,6 +563,7 @@ canvas.addEventListener('mousemove', (e) => {
         if (isBrushTool) {
             shapes[shapes.length - 1].points.push({ x: mouseX, y: mouseY });
             draw(); 
+            return;
         } 
         else {
             draw(); 
@@ -583,7 +601,22 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', (e) => {
-    if (isDrawing && !['brush', 'text', 'select', 'addImage'].includes(shapeSelector.value)) {
+
+    if (isDrawing && shapeSelector.value === 'brush') {
+        let lastStroke = shapes[shapes.length - 1];
+        
+        let minX = Math.min(...lastStroke.points.map(p => p.x));
+        let maxX = Math.max(...lastStroke.points.map(p => p.x));
+        let minY = Math.min(...lastStroke.points.map(p => p.y));
+        let maxY = Math.max(...lastStroke.points.map(p => p.y));
+
+        lastStroke.x = minX;
+        lastStroke.y = minY;
+        lastStroke.w = maxX - minX;
+        lastStroke.h = maxY - minY;
+    }
+
+    if (isDrawing && !['brush','text', 'select', 'addImage'].includes(shapeSelector.value)) {
         let mouseX = e.clientX;
         let mouseY = e.clientY;
         
@@ -611,12 +644,13 @@ canvas.addEventListener('mouseup', (e) => {
         selectedShape = newShape;
     }
 
+    
     if (isDrawing && shapeSelector.value === 'text') {
         let mouseX = e.clientX;
         let mouseY = e.clientY;
         
         addText(startX, startY, mouseX - startX, mouseY - startY);
-       
+
     }
 
     isDrawing = isRotating = resizingCorner = isDragging = false;
