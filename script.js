@@ -52,6 +52,7 @@ function draw() {
     //darkmode
 
     const isDark = document.body.classList.contains('dark-theme');
+    
     ctx.fillStyle = isDark ? '#1e1e1e' : '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -412,7 +413,8 @@ canvas.addEventListener('mousedown', (e) => {
     
     if (isBrushTool) {
         isDrawing = true;
-        
+        selectedShape = null;
+        const currentColor = colorPicker.value;
         let dashPattern = []; 
         if (brushStyle.value === 'dashed') dashPattern = [15, 10];
         else if (brushStyle.value === 'dotted') dashPattern = [2, 8];
@@ -422,7 +424,7 @@ canvas.addEventListener('mousedown', (e) => {
             points: [{ x: mouseX, y: mouseY }],
             color: colorPicker.value, 
             lineWidth: parseInt(lineWidth.value), 
-            opacity: parseInt(opacitySelector.value) / 100, 
+            opacity: parseInt(opacitySelector.value), 
             dash: dashPattern, 
             x: mouseX, y: mouseY 
         });
@@ -430,7 +432,6 @@ canvas.addEventListener('mousedown', (e) => {
         return;
     }
 
-    // 6. Handle Standard Shapes (Rect, Circle, Square, Text)
     if (shapeSelector.value !== 'select') {
         selectedShape = null;
         isDrawing = true;
