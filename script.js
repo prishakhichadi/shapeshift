@@ -359,6 +359,14 @@ function editText(shape) {
 }
 
 
+function getMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
 //LISTENERS 
 
 
@@ -409,10 +417,12 @@ window.addEventListener('keydown', (e) => {
 });
 
 canvas.addEventListener('mousedown', (e) => {
+
     if (e.target.tagName === 'TEXTAREA') return;
 
-    let mouseX = e.clientX;
-    let mouseY = e.clientY;
+    const pos = getMousePos(e);
+    let mouseX = pos.x;
+    let mouseY = pos.y;
 
     const isBrushTool = shapeSelector.value === 'brush' || ['solid', 'dashed', 'dotted'].includes(shapeSelector.value);
 
@@ -512,8 +522,9 @@ canvas.addEventListener('mousedown', (e) => {
 
 
 canvas.addEventListener('mousemove', (e) => {
-    let mouseX = e.clientX;
-    let mouseY = e.clientY;
+    const pos = getMousePos(e);
+    let mouseX = pos.x;
+    let mouseY = pos.y;
 
     if (isRotating && selectedShape) {
         let cx = selectedShape.x + selectedShape.w / 2;
@@ -602,6 +613,10 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('mouseup', (e) => {
 
+    const pos = getMousePos(e);
+    let mouseX = pos.x;
+    let mouseY = pos.y;
+
     if (isDrawing && shapeSelector.value === 'brush') {
         let lastStroke = shapes[shapes.length - 1];
         
@@ -617,8 +632,7 @@ canvas.addEventListener('mouseup', (e) => {
     }
 
     if (isDrawing && !['brush','text', 'select', 'addImage'].includes(shapeSelector.value)) {
-        let mouseX = e.clientX;
-        let mouseY = e.clientY;
+        
         
         let dash = (brushStyle.value === 'dashed') ? [15, 10] : (brushStyle.value === 'dotted') ? [2, 8] : [];
 
