@@ -28,6 +28,7 @@ let shapeBeforeResize = null;
 let isRotating = false;
 let rotationStartAngle = 0;
 let shapeStartRotation = 0;
+let tempTriPoints=[];
 
 
 
@@ -106,12 +107,13 @@ function draw() {
         }
         else if (s.type === 'triangle') {
             ctx.beginPath();
-            ctx.moveTo(s.x + s.w / 2, s.y);
-            ctx.lineTo(s.x + s.w, s.y + s.h);
-            ctx.lineTo(s.x, s.y + s.h);
+            ctx.moveTo(s.points[0].x,s.points[0].y);
+            ctx.lineTo(s.points[1].x,s.points[1].y);
+            ctx.lineTo(s.points[2].x,s.points[2].y);
             ctx.closePath();
             ctx.stroke();
-        }
+
+        }    
 
         ctx.restore();
 
@@ -119,6 +121,33 @@ function draw() {
             drawHandles(s);
         }
     }
+
+    if (tempTriPoints.length > 0 && shapeSelector.value === 'triangle') {
+        ctx.save();
+        ctx.strokeStyle = colorPicker.value;
+        ctx.setLineDash([5, 5]);
+
+        ctx.beginPath();
+        ctx.moveTo(tempTriPoints[0].x, tempTriPoints[0].y);
+        for (let i = 0; i < tempTriPoints.length; i++) {
+            ctx.lineTo(tempTriPoints[i].x, tempTriPoints[i].y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]); //reset dash for the points
+
+        tempTriPoints.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); 
+            ctx.fillStyle = '#0078d7';
+            ctx.strokeStyle = '#0078d7';
+            ctx.lineWidth = 1;
+            ctx.fill();
+            ctx.stroke();
+    });
+
+        ctx.restore();
+    }
+
 }
 
 function drawHandles(s) {
@@ -353,6 +382,25 @@ canvas.addEventListener('mousedown', (e) => {
         addImage(mouseX, mouseY);
         return;
     }
+
+
+    if (shapeSelector.value === 'triangle') {
+        tempTriPoints.push({ x: mouseX, y: mouseY });
+        if (tempTriPoints.length === 3) {
+            shapes.push({
+                type: 'triangle',
+                points: [...tempTriPoints], //use shallow copy, new triangle will ow disturb old triangle
+                color: colorPicker.value,
+                lineWidth: parseInt(lineWidth.value),
+                opacity: parseInt(opacitySelector.value)
+            });
+            tempTriPoints = []; //we reset for next triangle
+            saveCanvas();
+        }
+        draw();
+        return;
+    }
+
 
     if (shapeSelector.value !== 'select') {
         selectedShape = null;
