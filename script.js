@@ -35,13 +35,11 @@ let tempTriPoints=[];
 
 
 
-// --- 1. THE LOADER (Runs once on Page Load) ---
 const savedData = localStorage.getItem('shapeshift_save_data');
 
 if (savedData) {
     try {
         const parsed = JSON.parse(savedData);
-        // We map the data back into the shapes array
         shapes = parsed.map(s => {
             if (s.type === 'image' && s.imgSrc) {
                 const img = new Image();
@@ -52,7 +50,6 @@ if (savedData) {
             }
             return s;
         });
-        // Initial draw call to show the loaded shapes
         setTimeout(draw, 100); 
     } catch (e) {
         console.error("Load failed:", e);
@@ -274,7 +271,6 @@ function addImage(mx, my) {
         shapes.push(newImg);
         selectedShape = newImg;
         draw();
-        saveCanvas();
     };
     img.src = url;
 }
@@ -318,7 +314,6 @@ function addText(x, y, w, h) {
         }
         input.remove(); 
         draw();
-        saveCanvas();
     });
 }
 
@@ -360,7 +355,6 @@ function editText(shape) {
         }
         input.remove(); 
         draw();
-        saveCanvas();
     });
 }
 
@@ -382,7 +376,6 @@ clearBtn.addEventListener('click', () => {
         undoneShapes = [];   
         selectedShape = null;
         draw();            
-        saveCanvas();     
     }
 });
 
@@ -408,7 +401,6 @@ window.addEventListener('keydown', (e) => {
         
         selectedShape = null; 
         draw();
-        saveCanvas();
     }
 
 
@@ -417,7 +409,6 @@ window.addEventListener('keydown', (e) => {
             shapes = shapes.filter(s => s !== selectedShape);
             selectedShape = null;
             draw();
-            saveCanvas();
         }
     }
 });
@@ -510,7 +501,6 @@ canvas.addEventListener('mousedown', (e) => {
                 h: Math.max(...tempTriPoints.map(p => p.y)) - Math.min(...tempTriPoints.map(p => p.y))
             });
             tempTriPoints = [];
-            saveCanvas();
         }
         draw();
         return;
@@ -703,7 +693,6 @@ canvas.addEventListener('mouseup', (e) => {
 
     isDrawing = isRotating = resizingCorner = isDragging = false;
     draw();
-    saveCanvas();
 });
 
 
@@ -764,7 +753,6 @@ canvas.addEventListener('dblclick',(e) => {
 
         editText(clickedText);
         draw();
-        saveCanvas();
     }
 
 
