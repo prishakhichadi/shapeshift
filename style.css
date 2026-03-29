@@ -239,36 +239,19 @@ input[type="checkbox"]:checked + .circle::after {
     background: rgba(28, 28, 28, 0.85);
     backdrop-filter: blur(12px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px; /* More of a pill shape */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
     z-index: 1000;
 }
 
-.tool-btn {
-    width: 45px;
-    height: 45px;
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 18px;
+
+.sidebar-group {
     display: flex;
     align-items: center;
-    justify-content: center;
-    /*transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);*/
-}
-
-.tool-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: scale(1.05);
-}
-
-
-.tool-btn.active {
-    background: #ff5722;
-    border-color: #ff5722;
-    box-shadow: 0 0 15px rgba(255, 87, 34, 0.4);
+    gap: 5px;
+    padding: 0 10px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 #toolbar {
@@ -278,8 +261,4 @@ input[type="checkbox"]:checked + .circle::after {
 .sidebar-group {
     padding: 1.5em 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.sidebar-last-group {
-    padding: 1.5em 0;
 }
