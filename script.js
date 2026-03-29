@@ -302,9 +302,6 @@ function addImage(mx, my) {
 
 
 
-function saveCanvas() { localStorage.setItem('shapeshift_save_data', JSON.stringify(shapes)); }
-
-
 function addText(x, y, w, h) {
     const input = document.createElement('textarea');
 
@@ -348,7 +345,7 @@ function addText(x, y, w, h) {
 
 function editText(shape) {
     const input = document.createElement('textarea');
-    
+
     input.style.textAlign = 'center';
     input.style.position = 'fixed';
     input.style.left = shape.x + 'px';
