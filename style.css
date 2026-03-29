@@ -272,3 +272,62 @@ input[type="checkbox"]:checked + .circle::after {
     margin: 5px 0;
 }
 
+
+
+/* responsivenessss */
+@media screen and (max-width: 600px) {
+    
+    #toolbar {
+        top: 10px !important;
+        width: 95% !important;
+        flex-wrap: wrap !important; 
+        height: auto !important;
+        padding: 10px !important;
+        border-radius: 20px !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    .tool-group {
+        padding: 0 5px !important;
+        gap: 5px !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    
+    #sidebar {
+        left: 10px !important;
+        width: 45px !important;
+        padding: 5px !important;
+        
+
+        top: 55% !important; 
+        transform: translateY(-50%) scale(0.85) !important;
+        
+
+        background: rgba(28, 28, 28, 0.7) !important;
+    }
+
+    .sidebar-group {
+        padding: 0.5em 0 !important;
+    }
+
+
+    input[type="range"] {
+        width: 60px !important; 
+    }
+
+    input[type="range"] {
+        accent-color: #ff5722;  
+    }
+
+    button, select {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+    }
+
+
+    textarea {
+        text-align: center !important;
+    }
+}
