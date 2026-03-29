@@ -9,7 +9,7 @@ let togglebox=document.querySelector(".toggle-box")
 let circle=document.querySelector(".circle")
 const checkbox = document.getElementById("checkbox");
 const toolButtons = document.querySelectorAll('.tool-btn');
-
+const saveBtn = document.getElementById('saveBtn');
 
 let isDrawing = false;
 let startX, startY;
@@ -35,7 +35,29 @@ let tempTriPoints=[];
 
 
 
+// --- 1. THE LOADER (Runs once on Page Load) ---
+const savedData = localStorage.getItem('shapeshift_save_data');
 
+if (savedData) {
+    try {
+        const parsed = JSON.parse(savedData);
+        // We map the data back into the shapes array
+        shapes = parsed.map(s => {
+            if (s.type === 'image' && s.imgSrc) {
+                const img = new Image();
+                img.src = s.imgSrc;
+                s.img = img;
+                // Redraw once the image actually loads from the URL
+                img.onload = () => draw(); 
+            }
+            return s;
+        });
+        // Initial draw call to show the loaded shapes
+        setTimeout(draw, 100); 
+    } catch (e) {
+        console.error("Load failed:", e);
+    }
+}
 
 
 window.addEventListener('resize', () => {
@@ -747,3 +769,19 @@ canvas.addEventListener('dblclick',(e) => {
 
 
 });
+
+
+if (saveBtn) {
+    saveBtn.onclick = () => {
+        localStorage.setItem('shapeshift_save_data', JSON.stringify(shapes));
+        
+        const originalText = saveBtn.innerText;
+        saveBtn.innerText = "Saved!";
+        saveBtn.style.background = "#ff5722"; 
+        
+        setTimeout(() => {
+            saveBtn.innerText = originalText;
+            saveBtn.style.background = "";
+        }, 2000);
+    };
+}
