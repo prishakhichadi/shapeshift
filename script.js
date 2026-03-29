@@ -482,7 +482,7 @@ canvas.addEventListener('mousedown', (e) => {
                 color: colorPicker.value,
                 lineWidth: parseInt(lineWidth.value),
                 opacity: parseInt(opacitySelector.value),
-                x: Math.min(...tempTriPoints.map(p => p.x)), // Add bounds for selection
+                x: Math.min(...tempTriPoints.map(p => p.x)), //adding bounds for selection
                 y: Math.min(...tempTriPoints.map(p => p.y)),
                 w: Math.max(...tempTriPoints.map(p => p.x)) - Math.min(...tempTriPoints.map(p => p.x)),
                 h: Math.max(...tempTriPoints.map(p => p.y)) - Math.min(...tempTriPoints.map(p => p.y))
@@ -540,6 +540,8 @@ canvas.addEventListener('mousemove', (e) => {
             s.w = Math.max(10, (snap.x + snap.w) - local.x);
             s.h = Math.max(10, (snap.y + snap.h) - local.y);
         }
+
+        //just find ratio and scale!!!!
 
         if (s.points && oldW !== 0 && oldH !== 0) {
             let scaleX = s.w / oldW;
@@ -725,6 +727,7 @@ toolButtons.forEach(btn => {
     });
 });
 
+//hello
 
 canvas.addEventListener('dblclick',(e) => {
         const pos = getMousePos(e);
