@@ -310,6 +310,7 @@ function addText(x, y, w, h) {
 
     input.style.zIndex='2000';
 
+    input.style.textAlign = 'center';
     input.style.position = 'fixed';
     input.style.left = x + 'px';
     input.style.top = y + 'px';
@@ -348,6 +349,7 @@ function addText(x, y, w, h) {
 function editText(shape) {
     const input = document.createElement('textarea');
     
+    input.style.textAlign = 'center';
     input.style.position = 'fixed';
     input.style.left = shape.x + 'px';
     input.style.top = shape.y + 'px';
