@@ -396,6 +396,35 @@ function getMousePos(e) {
 
 //LISTENERS 
 
+function handleTouch(e, type) {
+    if (e.target.tagName === 'TEXTAREA') return; 
+    
+    const touch = e.touches[0] || e.changedTouches[0];
+    
+    const mouseEvent = new MouseEvent(type, {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    
+    canvas.dispatchEvent(mouseEvent);
+}
+
+
+canvas.addEventListener('touchstart', (e) => {
+
+    if (shapeSelector.value !== 'select') e.preventDefault(); 
+    handleTouch(e, 'mousedown');
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (shapeSelector.value !== 'select') e.preventDefault();
+    handleTouch(e, 'mousemove');
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    handleTouch(e, 'mouseup');
+});
+
 
 clearBtn.addEventListener('click', () => {
     if (confirm('Clear everything?')) {
