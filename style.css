@@ -249,7 +249,6 @@ input[type="checkbox"]:checked + .circle::after {
     align-items: center;
     gap: 5px;
     padding: 0 10px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
 }
@@ -261,4 +260,14 @@ input[type="checkbox"]:checked + .circle::after {
 .sidebar-group {
     padding: 1.5em 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-icon{
+    width:25px;
+    color:#f4f4f4;
+    filter: invert(100%) brightness(200%);
+}
+
+.tool-btn{
+    margin: 5px 0;
 }

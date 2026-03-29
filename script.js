@@ -294,7 +294,7 @@ function addImage(mx, my) {
     };
 
     img.onerror = () => {
-        alert("Failed to load image. Try a different link.");
+        alert("Failed to load image");
     };
 
     img.src = url;
