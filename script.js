@@ -115,8 +115,20 @@ function draw() {
 
 
         else if (s.type === 'image') {
-            ctx.drawImage(s.img, s.x, s.y, s.w, s.h);
+            if (s.img && s.img.complete) {
+                // If the image is loaded and ready, draw it
+                ctx.drawImage(s.img, s.x, s.y, s.w, s.h);
+            } else if (s.imgSrc) {
+                // If the image object is missing (after refresh), rebuild it
+                if (!s.img) {
+                    s.img = new Image();
+                    s.img.crossOrigin = "anonymous";
+                    s.img.src = s.imgSrc;
+                    s.img.onload = () => draw(); // Redraw once it's ready
+                }
+            }
         }
+
         else if (s.type === 'rect' || s.type === 'square') {
             ctx.strokeRect(s.x, s.y, s.w, s.h);
         }
@@ -253,27 +265,42 @@ function isNearHandle(hx, hy, px, py) {
 
 
 function addImage(mx, my) {
-    const url = prompt("Paste Image URL here:");
-
-    //js doesnt know what url looks like so was taking any input as valid and kept code running so had to define url pattern
-
+    let url = prompt("Paste Image URL (or leave blank for a random one):");
     const urlPattern = /^(https?:\/\/)/;
 
+
     if (!url || !urlPattern.test(url)) {
-        alert("Invalid URL");
-        return;
+        const randomSeed = Math.floor(Math.random() * 1000);
+        url = `https://picsum.photos/200/200?random=${randomSeed}`; //same pic was getting pasted ow
     }
 
     const img = new Image();
-    img.crossOrigin = "anonymous"; //security setting to avoid CORS issues?
+    img.crossOrigin = "anonymous"; 
+    
     img.onload = () => {
-        const newImg = { type: 'image', img: img, x: mx - 100, y: my - 100, w: 200, h: 200};
+        const newImg = { 
+            type: 'image', 
+            img: img, 
+            imgSrc: url,
+            x: mx - 100, 
+            y: my - 100, 
+            w: 200, 
+            h: 200,
+            rotation: 0
+        };
         shapes.push(newImg);
         selectedShape = newImg;
         draw();
     };
+
+    img.onerror = () => {
+        alert("Failed to load image. Try a different link.");
+    };
+
     img.src = url;
 }
+
+
 
 function saveCanvas() { localStorage.setItem('shapeshift_save_data', JSON.stringify(shapes)); }
 
@@ -482,7 +509,7 @@ canvas.addEventListener('mousedown', (e) => {
     }
 
     if (shapeSelector.value === 'addImage') {
-        showImageUI(mouseX, mouseY); 
+        addImage(mouseX, mouseY); 
         return;
     }
 
